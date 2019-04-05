@@ -1,6 +1,7 @@
 package br.pauloamcosta.services;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -11,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import br.pauloamcosta.model.CheckIn;
 import br.pauloamcosta.repositories.CheckInRepository;
+import br.pauloamcosta.services.exceptions.ObjectNotFoundException;
 
 /**
  * Classe de servicos para implementacao de inserir e buscar checkins.
@@ -68,4 +70,22 @@ public class CheckInService {
 		return checkInRepository.findAll(pageRequest);
 	}
 
+	public CheckIn find(Long id) {
+		Optional<CheckIn> obj = checkInRepository.findById(id);
+		return obj.orElseThrow(() -> new ObjectNotFoundException(
+				"Objeto não encontrado! Id: " + id + ", Tipo: " + CheckIn.class.getName()));
+	}
+
+	public CheckIn update(CheckIn obj) {
+		CheckIn newObj = find(obj.getId());
+		updateData(newObj, obj);
+		return checkInRepository.save(newObj);
+	}
+
+	private void updateData(CheckIn newObj, CheckIn obj) {
+		newObj.setPessoa(newObj.getPessoa());
+		newObj.setDataEntrada(newObj.getDataEntrada());
+		newObj.setDataSaida(newObj.getDataSaida());
+		newObj.setAdicionalVeiculo(newObj.isAdicionalVeiculo());
+	}
 }
