@@ -2,6 +2,11 @@
 
 Projeto de uma API REST responsável por gerenciar hóspedes e checkins de um hotel.
 
+Endpoints disponíveis:
+
+/checkins (GET, POST)
+/pessoas (GET, POST)
+
 # Como executar
 
 1) Clonar o projeto em sua máquina e abrir na IDE (Eclipse ou STS) com SpringBoot configurado.
