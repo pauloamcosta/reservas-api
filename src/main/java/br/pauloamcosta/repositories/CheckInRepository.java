@@ -7,6 +7,15 @@ import org.springframework.stereotype.Repository;
 
 import br.pauloamcosta.model.CheckIn;
 
+/**
+ * Repositório específico de checkin.
+ * 
+ * @author pauloamcosta
+ * @param <T>
+ *
+ * @since 1.0.0
+ */
+
 @Repository
 public interface CheckInRepository extends JpaRepository<CheckIn, Long> {
 	
