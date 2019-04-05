@@ -4,8 +4,8 @@ Projeto de uma API REST responsável por gerenciar hóspedes e checkins de um ho
 
 Endpoints disponíveis:
 
-/checkins (GET, POST)
-/pessoas (GET, POST)
+* /checkins (GET, POST)
+* /pessoas (GET, POST)
 
 # Como executar
 
