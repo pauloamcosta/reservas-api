@@ -15,6 +15,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.format.annotation.DateTimeFormat.ISO;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 /**
  * Classe de entidade representando os CheckIns.
@@ -47,6 +48,7 @@ public class CheckIn implements Serializable {
 	private LocalDateTime dataSaida;
 
 	private boolean adicionalVeiculo;
+	private double valorDiarias;
 
 	public CheckIn() {
 
@@ -74,7 +76,7 @@ public class CheckIn implements Serializable {
 	 * 
 	 * @return Dias total de hospedagem
 	 */
-	public long getDiasHospedagem(LocalDateTime dataEntrada, LocalDateTime dataSaida) {
+	public Long getDiasHospedagem(LocalDateTime dataEntrada, LocalDateTime dataSaida) {
 		return ChronoUnit.DAYS.between(dataEntrada, dataSaida);
 	}
 
@@ -87,8 +89,10 @@ public class CheckIn implements Serializable {
 	 * 
 	 * @return Valor da hospedagem
 	 */
+	
+	@JsonIgnoreProperties(value = {"parentActivity"})
 	public double getValorDiarias() {
-		long totalDias = getDiasHospedagem(getDataEntrada(), getDataSaida());
+		Long totalDias = getDiasHospedagem(getDataEntrada(), getDataSaida());
 		double valorDiaria = 120.0;
 		double valorEstacionamento = 15.0;
 		if (adicionalVeiculo == true) {
@@ -158,6 +162,10 @@ public class CheckIn implements Serializable {
 		if (id != other.id)
 			return false;
 		return true;
+	}
+
+	public void setValorDiarias(double valorDiarias) {
+		this.valorDiarias = valorDiarias;
 	}
 
 }

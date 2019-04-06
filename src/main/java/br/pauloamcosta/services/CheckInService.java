@@ -83,9 +83,15 @@ public class CheckInService {
 	}
 
 	private void updateData(CheckIn newObj, CheckIn obj) {
-		newObj.setPessoa(newObj.getPessoa());
-		newObj.setDataEntrada(newObj.getDataEntrada());
-		newObj.setDataSaida(newObj.getDataSaida());
-		newObj.setAdicionalVeiculo(newObj.isAdicionalVeiculo());
+		newObj.setPessoa(obj.getPessoa());
+		newObj.setDataEntrada(obj.getDataEntrada());
+		newObj.setDataSaida(obj.getDataSaida());
+		newObj.setAdicionalVeiculo(obj.isAdicionalVeiculo());
+		newObj.setValorDiarias(obj.getValorDiarias());
+	}
+
+	public void delete(Long id) {
+		find(id);
+		checkInRepository.deleteById(id);
 	}
 }

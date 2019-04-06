@@ -7,6 +7,7 @@ import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -48,6 +49,18 @@ public class CheckInController {
 			@RequestParam(value = "direcao", defaultValue = "DESC") String direcao) {
 		Page<CheckIn> list = checkInService.findAllByPages(pagina, linhasPorPagina, oderBy, direcao);
 		return ResponseEntity.ok().body(list);
+	}
+	@RequestMapping(value="/{id}", method=RequestMethod.PUT)
+	public ResponseEntity<Void> update(@Valid @RequestBody CheckIn obj, @PathVariable Long id) {
+		obj.setId(id);
+		obj = checkInService.update(obj);
+		return ResponseEntity.noContent().build();
+	}
+	
+	@RequestMapping(value="/{id}", method=RequestMethod.DELETE)
+	public ResponseEntity<Void> delete(@PathVariable Long id) {
+		checkInService.delete(id);
+		return ResponseEntity.noContent().build();
 	}
 
 }

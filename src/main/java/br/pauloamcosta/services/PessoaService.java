@@ -1,5 +1,7 @@
 package br.pauloamcosta.services;
 
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -9,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import br.pauloamcosta.model.Pessoa;
 import br.pauloamcosta.repositories.PessoaRepository;
+import br.pauloamcosta.services.exceptions.ObjectNotFoundException;
 
 /**
  * Classe de servicos para implementacao de inserir e buscar pessoas.
@@ -61,6 +64,29 @@ public class PessoaService {
 	public Page<Pessoa> findAllByPages(Integer pagina, Integer linhasPorPagina, String oderBy, String direcao) {
 		PageRequest pageRequest = PageRequest.of(pagina, linhasPorPagina, Direction.valueOf(direcao), oderBy);
 		return pessoaRepository.findAll(pageRequest);
+	}
+	public Pessoa find(Long id) {
+		Optional<Pessoa> obj = pessoaRepository.findById(id);
+		return obj.orElseThrow(() -> new ObjectNotFoundException(
+				"Objeto não encontrado! Id: " + id + ", Tipo: " + Pessoa.class.getName()));
+	}
+
+	public Pessoa update(Pessoa obj) {
+		Pessoa newObj = find(obj.getId());
+		updateData(newObj, obj);
+		return pessoaRepository.save(newObj);
+	}
+
+	private void updateData(Pessoa newObj, Pessoa obj) {
+		newObj.setNome(obj.getNome());
+		newObj.setDocumento(obj.getDocumento());
+		newObj.setTelefone(obj.getTelefone());
+		
+	}
+
+	public void delete(Long id) {
+		find(id);
+		pessoaRepository.deleteById(id);
 	}
 
 }
