@@ -3,6 +3,8 @@ package br.pauloamcosta.model;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -48,7 +50,13 @@ public class CheckIn implements Serializable {
 	private LocalDateTime dataSaida;
 
 	private boolean adicionalVeiculo;
-	private double valorDiarias;
+
+	static int DIARIA_SEMANA = 120;
+	static int DIARIA_FDS = 150;
+	static int DIARIA_EXTRA = 120;
+
+	static int ADD_GARAGEM_SEMANA = 15;
+	static int ADD_GARAGEM_FDS = 20;
 
 	public CheckIn() {
 
@@ -77,11 +85,13 @@ public class CheckIn implements Serializable {
 	 * @return Dias total de hospedagem
 	 */
 	public Long getDiasHospedagem(LocalDateTime dataEntrada, LocalDateTime dataSaida) {
+
 		return ChronoUnit.DAYS.between(dataEntrada, dataSaida);
 	}
 
 	/**
-	 * Método calcula valor da hospedagem
+	 * Método calcula valor da hospedagem. Verifica dia da semana e adicional de garagem para cálculo.
+	 * Verifica se hora da saída ultrapassa determinada hora. Se sim, um valor extra é adicionado.
 	 * 
 	 * @author pauloamcosta
 	 * 
@@ -89,17 +99,104 @@ public class CheckIn implements Serializable {
 	 * 
 	 * @return Valor da hospedagem
 	 */
-	
-	@JsonIgnoreProperties(value = {"parentActivity"})
+
+	@JsonIgnoreProperties(value = { "parentActivity" })
 	public double getValorDiarias() {
-		Long totalDias = getDiasHospedagem(getDataEntrada(), getDataSaida());
-		double valorDiaria = 120.0;
-		double valorEstacionamento = 15.0;
-		if (adicionalVeiculo == true) {
-			return (totalDias * valorDiaria) + valorEstacionamento;
-		} else {
-			return (totalDias * valorDiaria);
+
+		List<String> totalDatas = allDaysName();
+		List<Integer> valor = new ArrayList<>();
+		for (String diaSemana : totalDatas) {
+			if (diaSemana == "SUNDAY" || diaSemana == "SATURDAY") {
+				if (adicionalVeiculo) {
+					valor.add(DIARIA_FDS + ADD_GARAGEM_FDS);
+				} else {
+					valor.add(DIARIA_FDS);
+				}
+			} else {
+				if (adicionalVeiculo) {
+					valor.add(DIARIA_SEMANA + ADD_GARAGEM_SEMANA);
+				} else {
+					valor.add(DIARIA_SEMANA);
+				}
+			}
 		}
+		if (isAfterTime(dataSaida)) {	
+			valor.add(DIARIA_EXTRA);
+		}
+		
+		int somaDiarias = valor.stream().mapToInt(Integer::intValue).sum();
+		System.out.println(somaDiarias);
+		System.out.println(totalDatas);
+		System.out.println(dataSaida.getHour());
+
+		return somaDiarias;
+
+	}
+	
+	/**
+	 * Método que verifica se um LocalDateTime ultrapassou as 16:00
+	 * 
+	 * @author pauloamcosta
+	 * 
+	 * @param dataChecada = data a ser checada.
+	 * 
+	 * @since 1.0.0
+	 * 
+	 * @return Boolean informando se ultrapassou o horario ou não
+	 */
+
+	public boolean isAfterTime(LocalDateTime dataChecada) {
+			if (dataChecada.getHour() >= 16) {
+				return true;
+			}		
+		return false;
+	}
+	
+	/**
+	 * Método cria uma lista com o nome dos dias da semana de um período de tempo
+	 * @author pauloamcosta
+	 * 
+	 * @since 1.0.0
+	 * 
+	 * @return Lista com nome das datas de um período
+	 */
+
+
+	public List<String> allDaysName() {
+
+		List<String> totalDatas = new ArrayList<>();
+		while (!dataEntrada.isAfter(dataSaida)) {
+			totalDatas.add(dataEntrada.getDayOfWeek().name());
+			dataEntrada = dataEntrada.plusDays(1);
+		}
+		return totalDatas;
+	}
+	
+	/**
+	 * Método que verifica se hospedagem está ativa.
+	 * valida se a hora atual está no range de tempo de entrada e saída.
+	 * 
+	 * @author pauloamcosta
+	 * 
+	 * @since 1.0.0
+	 * 
+	 * @return Boolean informado se a hospedagem está ativa ou não
+	 */
+	public boolean getHospedagemAtiva() {
+		LocalDateTime agora = LocalDateTime.now();
+		return isWithinRange(agora);
+	}
+	
+	/**
+	 * Método que verifica se um LocalDateTime está em um determinado período de tempo.
+	 * @author pauloamcosta
+	 * 
+	 * @since 1.0.0
+	 * 
+	 * @return Boolean se está presente ou não.
+	 */
+	boolean isWithinRange(LocalDateTime testDate) {
+		return testDate.isBefore(dataSaida) || testDate.isAfter(dataEntrada);
 	}
 
 	public Long getId() {
@@ -165,7 +262,7 @@ public class CheckIn implements Serializable {
 	}
 
 	public void setValorDiarias(double valorDiarias) {
-		this.valorDiarias = valorDiarias;
+
 	}
 
 }

@@ -29,7 +29,7 @@ public class CheckInService {
 	CheckInRepository checkInRepository;
 
 	/**
-	 * Método que insere checkins. Data de entrada é setada para a data atual.
+	 * Função que insere checkins. Data de entrada é setada para a data atual.
 	 * 
 	 * @author pauloamcosta
 	 * 
@@ -38,20 +38,26 @@ public class CheckInService {
 	 * @since 1.0.0
 	 * 
 	 * @return objeto salvo no banco de dados
+	 * @throws Exception
 	 */
 
 	@Transactional
-	public CheckIn insert(CheckIn obj) {
+	public CheckIn insert(CheckIn obj) throws Exception {
 
 		LocalDateTime agora = LocalDateTime.now();
 
 		obj.setId(null);
 		obj.setDataEntrada(agora);
+		if (obj.getDataSaida().isEqual(agora) || obj.getDataSaida().isBefore(agora)) {
+			obj.setDataSaida(agora);
+			throw new Exception("Hora inserida inferior a hora de entrada");
+		}
+
 		return checkInRepository.save(obj);
 	}
 
 	/**
-	 * Método que busca checkins de forma paginada.
+	 * Função que Busca checkins de forma paginada.
 	 * 
 	 * @author pauloamcosta
 	 * 
@@ -64,24 +70,56 @@ public class CheckInService {
 	 * 
 	 * @return checkins
 	 */
-
 	public Page<CheckIn> findAllByPages(Integer pagina, Integer linhasPorPagina, String oderBy, String direcao) {
 		PageRequest pageRequest = PageRequest.of(pagina, linhasPorPagina, Direction.valueOf(direcao), oderBy);
 		return checkInRepository.findAll(pageRequest);
 	}
-
+	
+	/**
+	 * Função que Busca um determinado checkIn por Id.
+	 * 
+	 * @author pauloamcosta
+	 * 
+	 * @param id          = id do checkIn a ser buscado
+	 * 
+	 * @since 1.0.0
+	 * 
+	 * @return checkin específico
+	 */
 	public CheckIn find(Long id) {
 		Optional<CheckIn> obj = checkInRepository.findById(id);
 		return obj.orElseThrow(() -> new ObjectNotFoundException(
 				"Objeto não encontrado! Id: " + id + ", Tipo: " + CheckIn.class.getName()));
 	}
-
+	
+	/**
+	 * Função que atualiza um checkin
+	 * 
+	 * @author pauloamcosta
+	 * 
+	 * @param obj          = um determinado checkin para ser atualizado
+	 * 
+	 * @since 1.0.0
+	 * 
+	 * @return check atualizado salvo
+	 */
 	public CheckIn update(CheckIn obj) {
 		CheckIn newObj = find(obj.getId());
 		updateData(newObj, obj);
 		return checkInRepository.save(newObj);
 	}
-
+	
+	/**
+	 * Função que recebe os dados de um checkin e os atualizam
+	 * 
+	 * @author pauloamcosta
+	 * 
+	 * @param newObj          = checkin atualizado
+	 * @param obj          = checkin com dados a serem atualizados
+	 * 
+	 * @since 1.0.0
+	 * 
+	 */
 	private void updateData(CheckIn newObj, CheckIn obj) {
 		newObj.setPessoa(obj.getPessoa());
 		newObj.setDataEntrada(obj.getDataEntrada());
@@ -89,7 +127,17 @@ public class CheckInService {
 		newObj.setAdicionalVeiculo(obj.isAdicionalVeiculo());
 		newObj.setValorDiarias(obj.getValorDiarias());
 	}
-
+	
+	/**
+	 * Função que deleta um checkin por seu Id
+	 * 
+	 * @author pauloamcosta
+	 * 
+	 * @param id          = id do checkin a ser deletado
+	 * 
+	 * @since 1.0.0
+	 * 
+	 */
 	public void delete(Long id) {
 		find(id);
 		checkInRepository.deleteById(id);

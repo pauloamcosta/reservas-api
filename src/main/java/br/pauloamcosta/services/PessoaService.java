@@ -39,7 +39,6 @@ public class PessoaService {
 	 * 
 	 * @return objeto salvo no banco de dados
 	 */
-
 	@Transactional
 	public Pessoa insert(Pessoa obj) {
 		obj.setId(null);
@@ -60,30 +59,72 @@ public class PessoaService {
 	 * 
 	 * @return pessoas
 	 */
-
 	public Page<Pessoa> findAllByPages(Integer pagina, Integer linhasPorPagina, String oderBy, String direcao) {
 		PageRequest pageRequest = PageRequest.of(pagina, linhasPorPagina, Direction.valueOf(direcao), oderBy);
 		return pessoaRepository.findAll(pageRequest);
 	}
+	
+	/**
+	 * Função que Busca uma determinado pessoa por Id.
+	 * 
+	 * @author pauloamcosta
+	 * 
+	 * @param id          = id da pessoa a ser buscada
+	 * 
+	 * @since 1.0.0
+	 * 
+	 * @return pessoa específica
+	 */
 	public Pessoa find(Long id) {
 		Optional<Pessoa> obj = pessoaRepository.findById(id);
 		return obj.orElseThrow(() -> new ObjectNotFoundException(
 				"Objeto não encontrado! Id: " + id + ", Tipo: " + Pessoa.class.getName()));
 	}
 
+	/**
+	 * Função que atualiza uma pessoa
+	 * 
+	 * @author pauloamcosta
+	 * 
+	 * @param obj          = uma determinada pessoa para ser atualizado
+	 * 
+	 * @since 1.0.0
+	 * 
+	 * @return pessoa atualizada salva
+	 */
 	public Pessoa update(Pessoa obj) {
 		Pessoa newObj = find(obj.getId());
 		updateData(newObj, obj);
 		return pessoaRepository.save(newObj);
 	}
-
+	
+	/**
+	 * Função que recebe os dados de um pessoa e os atualizam
+	 * 
+	 * @author pauloamcosta
+	 * 
+	 * @param newObj          = pessoa atualizado
+	 * @param obj          = pessoa com dados a serem atualizados
+	 * 
+	 * @since 1.0.0
+	 * 
+	 */
 	private void updateData(Pessoa newObj, Pessoa obj) {
 		newObj.setNome(obj.getNome());
 		newObj.setDocumento(obj.getDocumento());
 		newObj.setTelefone(obj.getTelefone());
-		
 	}
 
+	/**
+	 * Função que deleta uma pessoa por seu Id
+	 * 
+	 * @author pauloamcosta
+	 * 
+	 * @param id          = id da pessoa a ser deletada
+	 * 
+	 * @since 1.0.0
+	 * 
+	 */
 	public void delete(Long id) {
 		find(id);
 		pessoaRepository.deleteById(id);

@@ -6,6 +6,7 @@ import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -35,8 +36,15 @@ public class CheckInController {
 	private CheckInService checkInService;
 
 	@RequestMapping(method = RequestMethod.POST)
-	public ResponseEntity<Void> insert(@Valid @RequestBody CheckIn obj) {
-		obj = checkInService.insert(obj);
+	public ResponseEntity<String> insert(@Valid @RequestBody CheckIn obj) {
+		try {
+			obj = checkInService.insert(obj);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.FORBIDDEN)
+		            .body("Data de saída não pode ser igual o inferior a de entrada");
+		}
 		URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(obj.getId()).toUri();
 		return ResponseEntity.created(uri).build();
 	}
@@ -50,6 +58,7 @@ public class CheckInController {
 		Page<CheckIn> list = checkInService.findAllByPages(pagina, linhasPorPagina, oderBy, direcao);
 		return ResponseEntity.ok().body(list);
 	}
+	
 	@RequestMapping(value="/{id}", method=RequestMethod.PUT)
 	public ResponseEntity<Void> update(@Valid @RequestBody CheckIn obj, @PathVariable Long id) {
 		obj.setId(id);
